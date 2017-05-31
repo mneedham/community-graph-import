@@ -50,7 +50,9 @@ def meetup_events(tx):
         records.append(record)
     return records
 
+
 app = flask.Flask('my app')
+
 
 @app.template_filter('humanise')
 def humanise_filter(value):
