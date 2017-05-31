@@ -1,8 +1,6 @@
 import datetime
 import os
-import datetime
-import sys
-from datetime import tzinfo, timedelta, datetime
+from datetime import datetime, timezone
 
 import boto
 import flask
@@ -10,18 +8,6 @@ from ago import human
 from flask import render_template
 from neo4j.v1 import GraphDatabase
 
-ZERO = timedelta(0)
-
-
-class UTC(tzinfo):
-    def utcoffset(self, dt):
-        return ZERO
-
-    def tzname(self, dt):
-        return "UTC"
-
-    def dst(self, dt):
-        return ZERO
 
 def github_links(tx):
     records = []
@@ -103,8 +89,7 @@ def generate_page_summary(event, context):
         meetup_records = session.read_transaction(meetup_events)
 
     with app.app_context():
-        utc = UTC()
-        time_now = str(datetime.now(utc))
+        time_now = str(datetime.now(timezone.utc))
 
         rendered = render_template('index.html',
                                    github_records=github_records,
@@ -113,13 +98,11 @@ def generate_page_summary(event, context):
                                    title=title,
                                    time_now=time_now)
 
-
         local_file_name = "/tmp/{0}.html".format(summary)
-        with open(local_file_name, "w") as file:
+        with open(local_file_name, "wb") as file:
             file.write(rendered.encode('utf-8'))
 
         s3_connection = boto.connect_s3()
         bucket = s3_connection.get_bucket(summary)
         key = boto.s3.key.Key(bucket, "{0}.html".format(summary))
         key.set_contents_from_filename(local_file_name)
-

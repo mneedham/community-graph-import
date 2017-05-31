@@ -18,4 +18,4 @@ functions:
       name: CommunityGraphGeneratePageSummary-${self:provider.environment.TITLE}
       handler: handler.generate_page_summary
       events:
-        - schedule: rate(1 minute)
+        - schedule: rate(1 hour)
