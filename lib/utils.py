@@ -198,6 +198,9 @@ def hydrate_links(neo4j_url, neo4j_user, neo4j_pass):
                     title = hydrate_url(record["url"])
                     rows += 1
                     update_graph(session, {"id": record["id"], "title": title})
+                except AttributeError:
+                    print("Failed to resolve {0}. Ignoring for now".format(record["url"]))
+                    update_graph(session, {"id": record["id"], "title": "N/A"})
                 except socket.gaierror:
                     print("Failed to resolve {0}. Ignoring for now".format(record["url"]))
                     update_graph(session, {"id": record["id"], "title": "N/A"})

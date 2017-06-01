@@ -9,6 +9,7 @@ provider:
   name: aws
   runtime: python3.6
   environment: ${file(env.yml):${self:custom.stage}}
+  timeout: 180
 
 plugins:
   - serverless-python-requirements
@@ -18,24 +19,24 @@ functions:
       name: CommunityGraphGeneratePageSummary-${self:provider.environment.TITLE}
       handler: handler.generate_page_summary
       events:
-        - schedule: rate(1 hour)
+        - schedule: rate(1 minute)
   twitter-import:
       name: CommunityGraphTwitterImport-${self:provider.environment.TITLE}
       handler: handler.twitter_import
       events:
-        - schedule: rate(1 hour)
+        - schedule: rate(1 minute)
   twitter-clean-links:
       name: CommunityGraphTwitterCleanLinks-${self:provider.environment.TITLE}
       handler: handler.twitter_clean_links
       events:
-        - schedule: rate(1 hour)
+        - schedule: rate(1 minute)
   twitter-hydrate-links:
       name: CommunityGraphTwitterHydrateLinks-${self:provider.environment.TITLE}
       handler: handler.twitter_hydrate_links
       events:
-        - schedule: rate(1 hour)
+        - schedule: rate(1 minute)
   github-import:
       name: CommunityGraphGitHubImport-${self:provider.environment.TITLE}
       handler: handler.github_import
       events:
-        - schedule: rate(1 hour)
+        - schedule: rate(1 minute)
