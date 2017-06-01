@@ -29,3 +29,13 @@ functions:
       handler: handler.twitter_clean_links
       events:
         - schedule: rate(1 hour)
+  twitter-hydrate-links:
+      name: CommunityGraphTwitterHydrateLinks-${self:provider.environment.TITLE}
+      handler: handler.twitter_hydrate_links
+      events:
+        - schedule: rate(1 hour)
+  github-import:
+      name: CommunityGraphGitHubImport-${self:provider.environment.TITLE}
+      handler: handler.github_import
+      events:
+        - schedule: rate(1 hour)
