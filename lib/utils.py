@@ -10,6 +10,9 @@ from neo4j.v1 import GraphDatabase, basic_auth
 
 import urllib.parse
 
+
+from urllib.parse import urlencode, urlparse, urlunparse, parse_qs
+
 import_query = """\
 UNWIND {tweets} AS t
 
@@ -139,6 +142,43 @@ def import_links(neo4j_url, neo4j_user, neo4j_pass, bearer_token, search):
                 if json.get('backoff', None) is not None:
                     print("backoff", json['backoff'])
                     time.sleep(json['backoff'] + 5)
+
+
+def clean_links(neo4j_url, neo4j_user, neo4j_pass):
+    with GraphDatabase.driver(neo4j_url, auth=basic_auth(neo4j_user, neo4j_pass)) as driver:
+        with driver.session() as session:
+            query = "MATCH (l:Link) WHERE NOT EXISTS(l.cleanUrl) AND EXISTS(l.url) RETURN l, ID(l) AS internalId"
+            result = session.run(query)
+
+            updates = []
+            for row in result:
+                uri = row["l"]["url"]
+                if uri:
+                    uri = uri.encode('utf-8')
+                    updates.append({"id": row["internalId"], "clean": clean_uri(uri)})
+
+            print("Updates to apply", updates)
+
+            update_query = """\
+            UNWIND {updates} AS update
+            MATCH (l:Link) WHERE ID(l) = update.id
+            SET l.cleanUrl = update.clean
+            """
+
+            update_result = session.run(update_query, {"updates": updates})
+
+            print(update_result)
+
+
+def clean_uri(url):
+    u = urlparse(url)
+    query = parse_qs(u.query)
+
+    for param in ["utm_content", "utm_source", "utm_medium", "utm_campaign", "utm_term"]:
+        query.pop(param, None)
+
+    u = u._replace(query=urlencode(query, True))
+    return urlunparse(u)
 
 
 def decrypt_value(encrypted):

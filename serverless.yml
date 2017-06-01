@@ -24,3 +24,8 @@ functions:
       handler: handler.twitter_import
       events:
         - schedule: rate(1 hour)
+  twitter-clean-links:
+      name: CommunityGraphTwitterCleanLinks-${self:provider.environment.TITLE}
+      handler: handler.twitter_clean_links
+      events:
+        - schedule: rate(1 hour)
