@@ -7,6 +7,8 @@ from ago import human
 from flask import render_template
 from neo4j.v1 import GraphDatabase
 
+from lib.utils import import_links, decrypt_value
+
 twitter_query = """\
 WITH ((timestamp() / 1000) - (7 * 24 * 60 * 60)) AS oneWeekAgo
 MATCH (l:Link)<--(t:Tweet:Content)
@@ -78,3 +80,18 @@ def generate_page_summary(event, _):
         bucket = s3_connection.get_bucket(summary)
         key = boto.s3.key.Key(bucket, "{summary}.html".format(summary=summary))
         key.set_contents_from_filename(local_file_name)
+
+
+def twitter_import(event, context):
+    print("Event:", event)
+
+    neo4j_url = os.environ.get('NEO4J_URL', "bolt://localhost")
+    neo4j_user = os.environ.get('NEO4J_USER', "neo4j")
+
+    neo4j_password = decrypt_value(os.environ['NEO4J_PASSWORD'])
+    twitter_bearer = decrypt_value(os.environ['TWITTER_BEARER'])
+
+    search = os.environ.get("TWITTER_SEARCH")
+
+    import_links(neo4j_url=neo4j_url, neo4j_user=neo4j_user, neo4j_pass=neo4j_password,
+                 bearer_token=twitter_bearer, search=search)

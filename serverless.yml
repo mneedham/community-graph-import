@@ -19,3 +19,8 @@ functions:
       handler: handler.generate_page_summary
       events:
         - schedule: rate(1 hour)
+  twitter-import:
+      name: CommunityGraphTwitterImport-${self:provider.environment.TITLE}
+      handler: handler.twitter_import
+      events:
+        - schedule: rate(1 hour)
