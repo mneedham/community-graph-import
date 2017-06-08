@@ -239,7 +239,7 @@ def hydrate_url(url):
         return potential_title[0].text
 
 
-def import_github(neo4j_url, neo4j_user, neo4j_pass, github_token):
+def import_github(neo4j_url, neo4j_user, neo4j_pass, tag, github_token):
     with GraphDatabase.driver(neo4j_url, auth=basic_auth(neo4j_user, neo4j_pass)) as driver:
         with driver.session() as session:
             # Build query.
@@ -265,7 +265,7 @@ def import_github(neo4j_url, neo4j_user, neo4j_pass, github_token):
 
             print("Processing projects from {0}".format(from_date))
 
-            search = "neo4j pushed:>{0}".format(from_date)
+            search = "{0} pushed:>{1}".format(tag, from_date)
             cursor = None
             has_more = True
 
@@ -388,6 +388,8 @@ def import_github(neo4j_url, neo4j_user, neo4j_pass, github_token):
                       "has_more", has_more,
                       "cursor", cursor,
                       "repositoryCount", search_section["repositoryCount"])
+
+
 
 
 def decrypt_value(encrypted):

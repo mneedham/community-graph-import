@@ -8,6 +8,7 @@ from flask import render_template
 from neo4j.v1 import GraphDatabase
 
 from lib.utils import import_links, decrypt_value, clean_links, hydrate_links, import_github
+import lib.meetup as meetup
 
 twitter_query = """\
 WITH ((timestamp() / 1000) - (7 * 24 * 60 * 60)) AS oneWeekAgo
@@ -51,7 +52,10 @@ WITH n
 MATCH (n)<-[:POSTED]-(user) WHERE NOT (user.screen_name IN ["neo4j", "neo4j-contrib"])
 WITH user, COUNT(*) AS count
 ORDER BY count desc
-RETURN user.screen_name AS user, user.profile_image_url AS profile_image, count
+WITH user,  count
+MATCH (user)-[:POSTED]->(n:Tweet) WHERE EXISTS(n.created) AND ((timestamp() / 1000) - 7 * 60 * 60 * 24 ) > n.created > ((timestamp() / 1000) - 14 * 60 * 60 * 24 )
+RETURN user.screen_name AS user, user.profile_image_url AS profile_image, count, count(*) AS lastWeekCount
+ORDER BY count desc
 """
 
 app = flask.Flask('my app')
@@ -147,4 +151,29 @@ def github_import(event, _):
     neo4j_password = decrypt_value(os.environ['NEO4J_PASSWORD'])
     github_token = decrypt_value(os.environ["GITHUB_TOKEN"])
 
-    import_github(neo4j_url=neo4j_url, neo4j_user=neo4j_user, neo4j_pass=neo4j_password, github_token=github_token)
+    tag = os.environ.get('TAG')
+
+    import_github(neo4j_url=neo4j_url, neo4j_user=neo4j_user, neo4j_pass=neo4j_password, tag = tag, github_token=github_token)
+
+
+def meetup_events_import(event, _):
+    print("Event:", event)
+
+    neo4j_url = os.environ.get('NEO4J_URL', "bolt://localhost")
+    neo4j_user = os.environ.get('NEO4J_USER', "neo4j")
+    neo4j_password = decrypt_value(os.environ['NEO4J_PASSWORD'])
+    meetup_key = decrypt_value(os.environ["MEETUP_API_KEY"])
+
+    meetup.import_events(neo4j_url=neo4j_url, neo4j_user=neo4j_user, neo4j_pass=neo4j_password, meetup_key=meetup_key)
+
+def meetup_groups_import(event, _):
+    print("Event:", event)
+
+    neo4j_url = os.environ.get('NEO4J_URL', "bolt://localhost")
+    neo4j_user = os.environ.get('NEO4J_USER', "neo4j")
+    neo4j_password = decrypt_value(os.environ['NEO4J_PASSWORD'])
+    meetup_key = decrypt_value(os.environ["MEETUP_API_KEY"])
+
+    tag = os.environ.get('TAG')
+
+    meetup.import_groups(neo4j_url=neo4j_url, neo4j_user=neo4j_user, neo4j_pass=neo4j_password, tag = tag, meetup_key=meetup_key)

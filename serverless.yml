@@ -49,3 +49,13 @@ functions:
       handler: handler.github_import
       events:
         - schedule: rate(1 hour)
+  meetup-events-import:
+      name: CommunityGraphMeetupEventsImport-${self:provider.environment.TITLE}
+      handler: handler.meetup_events_import
+      events:
+        - schedule: rate(1 hour)
+  meetup-groups-import:
+      name: CommunityGraphMeetupGroupsImport-${self:provider.environment.TITLE}
+      handler: handler.meetup_groups_import
+      events:
+        - schedule: rate(1 day)
