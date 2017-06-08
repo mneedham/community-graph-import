@@ -36,6 +36,24 @@ RETURN event, group
 ORDER BY event.time
 """
 
+github_active_query = """
+MATCH (n:Repository) WHERE EXISTS(n.created) AND n.updated > timestamp() - 7* 60 * 60 * 24 * 1000
+WITH n
+MATCH (n)<-[:CREATED]-(user) WHERE NOT (user.name IN ["neo4j", "neo4j-contrib"])
+WITH user, COUNT(*) AS count, COLLECT(n) as repos
+ORDER BY count desc
+RETURN user.name, user.avatarUrl, count, [repo in repos | repo { .title, .full_name }] AS repositories
+"""
+
+twitter_active_query = """\
+MATCH (n:Tweet) WHERE EXISTS(n.created) AND n.created > ((timestamp() / 1000) - 7 * 60 * 60 * 24 )
+WITH n
+MATCH (n)<-[:POSTED]-(user) WHERE NOT (user.screen_name IN ["neo4j", "neo4j-contrib"])
+WITH user, COUNT(*) AS count
+ORDER BY count desc
+RETURN user.screen_name AS user, user.profile_image_url AS profile_image, count
+"""
+
 app = flask.Flask('my app')
 
 
@@ -63,12 +81,16 @@ def generate_page_summary(event, _):
             github_records = session.read_transaction(lambda tx: list(tx.run(github_query)))
             twitter_records = session.read_transaction(lambda tx: list(tx.run(twitter_query)))
             meetup_records = session.read_transaction(lambda tx: list(tx.run(meetup_query)))
+            github_active_members = session.read_transaction(lambda tx: list(tx.run(github_active_query)))
+            twitter_active_members = session.read_transaction(lambda tx: list(tx.run(twitter_active_query)))
 
     with app.app_context():
         rendered = render_template('index.html',
                                    github_records=github_records,
                                    twitter_records=twitter_records,
                                    meetup_records=meetup_records,
+                                   github_active_members=github_active_members,
+                                   twitter_active_members=twitter_active_members,
                                    title=title,
                                    time_now=str(datetime.now(timezone.utc)))
 

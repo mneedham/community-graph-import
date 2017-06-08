@@ -1,109 +1,170 @@
 <!doctype html>
 <html>
-  <head>
+<head>
     <title>This Week In {{ title }}</title>
-      <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
 
     <!-- Latest compiled and minified CSS -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
+          integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
 
     <!-- Optional theme -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css"
+          integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
 
 
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" ></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 
-  </head>
+</head>
 
-  <body>
+<body>
 <div class="container">
-  <h1>This Week in {{ title }}</h1>
+    <h1>This Week in {{ title }}</h1>
     <p>
         Generated at <strong>{{ time_now }}</strong>
     </p>
 
-  <ul class="nav nav-tabs" role="tablist">
-    <li role="presentation" class="active"><a href="#twitter" aria-controls="twitter" role="tab" data-toggle="tab">Twitter</a></li>
-    <li role="presentation"><a href="#github" aria-controls="github" role="tab" data-toggle="tab">GitHub</a></li>
-      <li role="presentation"><a href="#meetup" aria-controls="meetup" role="tab" data-toggle="tab">Meetup</a></li>
-  </ul>
+    <ul class="nav nav-tabs" role="tablist">
+        <li role="presentation" class="active"><a href="#twitter" aria-controls="twitter" role="tab" data-toggle="tab">Twitter</a></li>
+        <li role="presentation"><a href="#github" aria-controls="github" role="tab" data-toggle="tab">GitHub</a></li>
+        <li role="presentation"><a href="#meetup" aria-controls="meetup" role="tab" data-toggle="tab">Meetup</a></li>
+        <li role="presentation"><a href="#twitter-active-members" aria-controls="twitter-active-members" role="tab" data-toggle="tab">Twitter Active Members</a></li>
+        <li role="presentation"><a href="#github-active-members" aria-controls="github-active-members" role="tab" data-toggle="tab">GitHub Active Members</a></li>
+    </ul>
 
     <div class="tab-content">
-      <div role="tabpanel" class="tab-pane active" id="twitter">
-        <table class="table table-striped">
-          <tr>
-            <th>Title</th>
-             <th>URL</th>
-             <th>Score</th>
-             <th>Users</th>
-             <th>Created</th>
-         </tr>
+        <div role="tabpanel" class="tab-pane active" id="twitter">
+            <table class="table table-striped">
+                <tr>
+                    <th>Title</th>
+                    <th>URL</th>
+                    <th>Score</th>
+                    <th>Users</th>
+                    <th>Created</th>
+                </tr>
 
-        {% for r in twitter_records %}
-          <tr>
-            <td>{{ r['title'] }}</td>
-            <td><a href="{{r['url']}}" target="_blank">{{r['url'] | shorten }}</a></td>
-            <td>{{ r['score']}}</td>
-            <td>
-              <ul class="list-inline">
-              {% for user in r['users'] %}
-                <li><a href="http://twitter.com/{{ user }}" target="_blank">@{{ user }}</a></li>
-              {% endfor %}
-              </ul>
-            </td>
-            <td>
-              {{ r['dateCreated'] | humanise }}
-            </td>
-          </tr>
-        {% endfor %}
-      </table>
+                {% for r in twitter_records %}
+                <tr>
+                    <td>{{ r['title'] }}</td>
+                    <td><a href="{{r['url']}}" target="_blank">{{r['url'] | shorten }}</a></td>
+                    <td>{{ r['score']}}</td>
+                    <td>
+                        <ul class="list-inline">
+                            {% for user in r['users'] %}
+                            <li><a href="http://twitter.com/{{ user }}" target="_blank">@{{ user }}</a></li>
+                            {% endfor %}
+                        </ul>
+                    </td>
+                    <td>
+                        {{ r['dateCreated'] | humanise }}
+                    </td>
+                </tr>
+                {% endfor %}
+            </table>
 
-      </div>
+        </div>
 
-      <div role="tabpanel" class="tab-pane" id="github">
-        <table class="table .table-striped">
-          <tr>
-             <th>Project</th>
-             <th>User</th>
-             <th>Favourites</th>
-             <th>Updated</th>
-             <th>Created</th>
-         </tr>
+        <div role="tabpanel" class="tab-pane" id="github">
+            <table class="table .table-striped">
+                <tr>
+                    <th>Project</th>
+                    <th>User</th>
+                    <th>Favourites</th>
+                    <th>Updated</th>
+                    <th>Created</th>
+                </tr>
 
-        {% for r in github_records %}
-          <tr>
-            <td><a href="{{r['n.url']}}" target="_blank">{{r['n.title']}}</a></td>
-            <td><a href="http://github.com/{{r['user.name']}}" target="_blank">{{r['user.name']}}</a></td>
-            <td>{{ r['n.favorites']}}</td>
-            <td>{{ r['n.updated'] | humanise }}</td>
-            <td>{{ r['n.created'] | humanise }}</td>
-          </tr>
-        {% endfor %}
-      </table>
-      </div>
+                {% for r in github_records %}
+                <tr>
+                    <td><a href="{{r['n.url']}}" target="_blank">{{r['n.title']}}</a></td>
+                    <td><a href="http://github.com/{{r['user.name']}}" target="_blank">{{r['user.name']}}</a></td>
+                    <td>{{ r['n.favorites']}}</td>
+                    <td>{{ r['n.updated'] | humanise }}</td>
+                    <td>{{ r['n.created'] | humanise }}</td>
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
 
-      <div role="tabpanel" class="tab-pane" id="meetup">
-        <table class="table .table-striped">
-          <tr>
-             <th>Event</th>
-             <th>Group</th>
-             <th>Time</th>
-         </tr>
+        <div role="tabpanel" class="tab-pane" id="meetup">
+            <table class="table .table-striped">
+                <tr>
+                    <th>Event</th>
+                    <th>Group</th>
+                    <th>Time</th>
+                </tr>
 
-        {% for r in meetup_records %}
-          <tr>
-            <td><a href="{{r['event']['link']}}" target="_blank">{{ r['event']['title'] }}</a></td>
-            <td>{{ r['group']['title'] }}</td>
-            <td>{{ r['event']['time'] | humanise }}</td>
-          </tr>
-        {% endfor %}
-      </table>
-      </div>
+                {% for r in meetup_records %}
+                <tr>
+                    <td><a href="{{r['event']['link']}}" target="_blank">{{ r['event']['title'] }}</a></td>
+                    <td>{{ r['group']['title'] }}</td>
+                    <td>{{ r['event']['time'] | humanise }}</td>
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
+
+           <div role="tabpanel" class="tab-pane" id="twitter-active-members">
+
+            <table class="table .table-striped">
+                <tr>
+                    <th>User</th>
+                    <th># of tweets</th>
+                </tr>
+
+                {% for r in twitter_active_members %}
+                <tr>
+                    <td>
+                        <div style="float:left; margin-right:5px;">
+                            <img src="{{ r['profile_image'] }}" />
+                        </div>
+                        <div style="padding-top: 15px;">
+                            <a href="http://twitter.com/{{r['user']}}" target="_blank">@{{r['user']}}</a>
+                        </div>
+                    </td>
+                    <td>{{ r['count'] }}</td>
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
+
+        <div role="tabpanel" class="tab-pane" id="github-active-members">
+
+            <table class="table .table-striped">
+                <tr>
+                    <th>User</th>
+                    <th># of repositories</th>
+                    <th>Repositories</th>
+                </tr>
+
+                {% for r in github_active_members %}
+                <tr>
+                    <td>
+                        <div style="float:left; margin-right:5px;">
+                            <img src="{{ r['user.avatarUrl'] }}" width="48px" height="48px" />
+                        </div>
+                        <div style="padding-top: 15px;">
+                            <a href="http://github.com/{{r['user.name']}}" target="_blank">{{r['user.name']}}</a>
+                        </div>
+                    </td>
+                    <td>{{ r['count'] }}</td>
+                    <td>
+                        <ul class="list-inline">
+                            {% for repo in r['repositories'] %}
+                            <li><a href="http://github.com/{{ repo['full_name'] }}" target="_blank">{{ repo['title']
+                                }}</a></li>
+                            {% endfor %}
+                        </ul>
+                    </td>
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
 
 
     </div>
 </div>
 
-  </body>
+</body>
 </html>

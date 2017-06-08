@@ -256,7 +256,8 @@ def import_github(neo4j_url, neo4j_user, neo4j_pass, github_token):
                   repo.watchers = r.watchers, repo.language = r.language, repo.forks = r.forks_count,
                   repo.open_issues = r.open_issues, repo.branch = r.default_branch, repo.description = r.description
             MERGE (owner:User:GitHub {id:r.owner.id}) 
-              SET owner.name = r.owner.login, owner.type=r.owner.type, owner.full_name = r.owner.name, owner.location = r.owner.location
+              SET owner.name = r.owner.login, owner.type=r.owner.type, owner.full_name = r.owner.name, 
+                  owner.location = r.owner.location, owner.avatarUrl = r.owner.avatarUrl
             MERGE (owner)-[:CREATED]->(repo)
             """
 
@@ -308,7 +309,8 @@ def import_github(neo4j_url, neo4j_user, neo4j_pass, github_token):
                                }
                                owner {          
                                  __typename
-                                 login                         
+                                 login
+                                 avatarUrl
                                  ... on User {
                                    name
                                    databaseId
@@ -356,6 +358,7 @@ def import_github(neo4j_url, neo4j_user, neo4j_pass, github_token):
                         "owner": {
                             "id": node["owner"].get("databaseId", ""),
                             "login": node["owner"]["login"],
+                            "avatarUrl": node["owner"]["avatarUrl"],
                             "name": node["owner"].get("name", ""),
                             "type": node["owner"]["__typename"],
                             "location": node["owner"].get("location", "")
