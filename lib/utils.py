@@ -15,6 +15,10 @@ from bs4 import BeautifulSoup
 from dateutil.parser import parse
 from neo4j.v1 import GraphDatabase, basic_auth
 
+# from neo4j.util import Watcher
+# watcher = Watcher("neo4j.bolt")
+# watcher.watch()
+
 import_query = """\
 UNWIND {tweets} AS t
 
@@ -157,6 +161,7 @@ def clean_links(neo4j_url, neo4j_user, neo4j_pass):
                 uri = row["l"]["url"]
                 if uri:
                     uri = uri.encode('utf-8')
+                    print("URL to clean:", uri)
                     updates.append({"id": row["internalId"], "clean": clean_uri(uri)})
 
             print("Updates to apply", updates)
@@ -179,8 +184,9 @@ def clean_uri(url):
     for param in ["utm_content", "utm_source", "utm_medium", "utm_campaign", "utm_term"]:
         query.pop(param, None)
 
-    u = u._replace(query=urlencode(query, True))
-    return urlunparse(u)
+    u = u._replace(query=bytes(urlencode(query, True), "utf-8"))
+
+    return urlunparse(u).decode("utf-8")
 
 
 def hydrate_links(neo4j_url, neo4j_user, neo4j_pass):
