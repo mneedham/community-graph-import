@@ -9,6 +9,7 @@ from neo4j.v1 import GraphDatabase
 
 from lib.utils import import_links, decrypt_value, clean_links, hydrate_links, import_github
 import lib.meetup as meetup
+import lib.so as so
 
 twitter_query = """\
 WITH ((timestamp() / 1000) - (7 * 24 * 60 * 60)) AS oneWeekAgo
@@ -37,6 +38,14 @@ RETURN event, group
 ORDER BY event.time
 """
 
+so_query = """\
+WITH ((timestamp() / 1000) - (7 * 24 * 60 * 60)) AS oneWeekAgo
+match (tag)<-[:TAGGED]-(question:Question:Content:StackOverflow)<--(:Answer)<-[:POSTED]-(user)
+WHERE question.created > oneWeekAgo
+RETURN question, COLLECT(DISTINCT tag.name) AS tags
+ORDER BY question.views DESC
+"""
+
 github_active_query = """
 MATCH (n:Repository) WHERE EXISTS(n.created) AND n.updated > timestamp() - 7* 60 * 60 * 24 * 1000
 WITH n
@@ -52,10 +61,23 @@ WITH n
 MATCH (n)<-[:POSTED]-(user) WHERE NOT (user.screen_name IN ["neo4j", "neo4j-contrib"])
 WITH user, COUNT(*) AS count
 ORDER BY count desc
-WITH user,  count
+WITH user, count
 MATCH (user)-[:POSTED]->(n:Tweet) WHERE EXISTS(n.created) AND ((timestamp() / 1000) - 7 * 60 * 60 * 24 ) > n.created > ((timestamp() / 1000) - 14 * 60 * 60 * 24 )
 RETURN user.screen_name AS user, user.profile_image_url AS profile_image, count, count(*) AS lastWeekCount
 ORDER BY count desc
+"""
+
+so_active_query = """\
+WITH ((timestamp() / 1000) - (7 * 24 * 60 * 60)) AS oneWeekAgo,
+     ((timestamp() / 1000) - (14* 24 * 60 * 60)) AS twoWeeksAgo
+match (question:Question:Content:StackOverflow)<--(:Answer)<-[:POSTED]-(user)
+WHERE question.created > oneWeekAgo
+WITH user, count(*) AS replies, oneWeekAgo, twoWeeksAgo
+ORDER BY replies DESC
+MATCH (user)-[:POSTED]->(:Answer)-->(question:Question) 
+WHERE oneWeekAgo > question.created > twoWeeksAgo
+RETURN user, replies, COUNT(*) AS lastWeekReplies
+ORDER BY replies DESC
 """
 
 app = flask.Flask('my app')
@@ -85,16 +107,20 @@ def generate_page_summary(event, _):
             github_records = session.read_transaction(lambda tx: list(tx.run(github_query)))
             twitter_records = session.read_transaction(lambda tx: list(tx.run(twitter_query)))
             meetup_records = session.read_transaction(lambda tx: list(tx.run(meetup_query)))
+            so_records = session.read_transaction(lambda tx: list(tx.run(so_query)))
             github_active_members = session.read_transaction(lambda tx: list(tx.run(github_active_query)))
             twitter_active_members = session.read_transaction(lambda tx: list(tx.run(twitter_active_query)))
+            so_active_members = session.read_transaction(lambda tx: list(tx.run(so_active_query)))
 
     with app.app_context():
         rendered = render_template('index.html',
                                    github_records=github_records,
                                    twitter_records=twitter_records,
                                    meetup_records=meetup_records,
+                                   so_records=so_records,
                                    github_active_members=github_active_members,
                                    twitter_active_members=twitter_active_members,
+                                   so_active_members=so_active_members,
                                    title=title,
                                    time_now=str(datetime.now(timezone.utc)))
 
@@ -166,6 +192,7 @@ def meetup_events_import(event, _):
 
     meetup.import_events(neo4j_url=neo4j_url, neo4j_user=neo4j_user, neo4j_pass=neo4j_password, meetup_key=meetup_key)
 
+
 def meetup_groups_import(event, _):
     print("Event:", event)
 
@@ -176,4 +203,17 @@ def meetup_groups_import(event, _):
 
     tag = os.environ.get('TAG')
 
-    meetup.import_groups(neo4j_url=neo4j_url, neo4j_user=neo4j_user, neo4j_pass=neo4j_password, tag = tag, meetup_key=meetup_key)
+    meetup.import_groups(neo4j_url=neo4j_url, neo4j_user=neo4j_user, neo4j_pass=neo4j_password, tag=tag,
+                         meetup_key=meetup_key)
+
+
+def so_import(event, _):
+    print("Event:", event)
+
+    neo4j_url = os.environ.get('NEO4J_URL', "bolt://localhost")
+    neo4j_user = os.environ.get('NEO4J_USER', "neo4j")
+    neo4j_password = decrypt_value(os.environ['NEO4J_PASSWORD'])
+
+    tag = os.environ.get('TAG')
+
+    so.import_so(neo4j_url=neo4j_url, neo4j_user=neo4j_user, neo4j_pass=neo4j_password, tag = tag)

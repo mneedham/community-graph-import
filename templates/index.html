@@ -29,11 +29,14 @@
         <li role="presentation" class="active"><a href="#twitter" aria-controls="twitter" role="tab" data-toggle="tab">Twitter</a></li>
         <li role="presentation"><a href="#github" aria-controls="github" role="tab" data-toggle="tab">GitHub</a></li>
         <li role="presentation"><a href="#meetup" aria-controls="meetup" role="tab" data-toggle="tab">Meetup</a></li>
-        <li role="presentation"><a href="#twitter-active-members" aria-controls="twitter-active-members" role="tab" data-toggle="tab">Twitter Active Members</a></li>
-        <li role="presentation"><a href="#github-active-members" aria-controls="github-active-members" role="tab" data-toggle="tab">GitHub Active Members</a></li>
+        <li role="presentation"><a href="#so" aria-controls="so" role="tab" data-toggle="tab">StackOverflow</a></li>
+        <li role="presentation"><a href="#twitter-active-members" aria-controls="twitter-active-members" role="tab" data-toggle="tab">Twitter Active</a></li>
+        <li role="presentation"><a href="#github-active-members" aria-controls="github-active-members" role="tab" data-toggle="tab">GitHub Active</a></li>
+        <li role="presentation"><a href="#so-active-members" aria-controls="so-active-members" role="tab" data-toggle="tab">SO Active</a></li>
     </ul>
 
     <div class="tab-content">
+
         <div role="tabpanel" class="tab-pane active" id="twitter">
             <table class="table table-striped">
                 <tr>
@@ -105,7 +108,32 @@
             </table>
         </div>
 
-           <div role="tabpanel" class="tab-pane" id="twitter-active-members">
+        <div role="tabpanel" class="tab-pane" id="so">
+            <table class="table .table-striped">
+                <tr>
+                    <th>Question</th>
+                    <th>Views</th>
+                    <th>Tags</th>
+                </tr>
+
+                {% for r in so_records %}
+                <tr>
+                    <td><a href="{{r['question']['url']}}" target="_blank">{{ r['question']['title'] }}</a></td>
+                    <td>{{ r['question']['views'] }}</td>
+                    <td style="width:50%">
+                        <ul class="list-inline">
+                            {% for tag in r['tags'] %}
+                            <li><a href="https://stackoverflow.com/questions/tagged/{{ tag }}" target="_blank">{{ tag }}</a></li>
+                            {% endfor %}
+                        </ul>
+
+                    </td>
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
+
+        <div role="tabpanel" class="tab-pane" id="twitter-active-members">
 
             <table class="table .table-striped">
                 <tr>
@@ -134,7 +162,7 @@
             <table class="table .table-striped">
                 <tr>
                     <th>User</th>
-                    <th># of repositories</th>
+                    <th># of repos</th>
                     <th>Repositories</th>
                 </tr>
 
@@ -149,7 +177,7 @@
                         </div>
                     </td>
                     <td>{{ r['count'] }}</td>
-                    <td>
+                    <td style="width:50%">
                         <ul class="list-inline">
                             {% for repo in r['repositories'] %}
                             <li><a href="http://github.com/{{ repo['full_name'] }}" target="_blank">{{ repo['title']
@@ -157,6 +185,30 @@
                             {% endfor %}
                         </ul>
                     </td>
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
+
+                <div role="tabpanel" class="tab-pane" id="so-active-members">
+
+            <table class="table .table-striped">
+                <tr>
+                    <th>User</th>
+                    <th># of answers</th>
+                </tr>
+
+                {% for r in so_active_members %}
+                <tr>
+                    <td>
+                        <div style="float:left; margin-right:5px;">
+                            <img src="{{ r['user']['profileImage'] }}" width="48px" height="48px" />
+                        </div>
+                        <div style="padding-top: 15px;">
+                            <a href="https://stackoverflow.com/users/{{r['user']['id']}}" target="_blank">{{r['user']['name']}}</a>
+                        </div>
+                    </td>
+                    <td>{{ r['replies'] }} ({{ r['lastWeekReplies'] }})</td>
                 </tr>
                 {% endfor %}
             </table>

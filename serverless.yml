@@ -59,3 +59,8 @@ functions:
       handler: handler.meetup_groups_import
       events:
         - schedule: rate(1 day)
+  so-import:
+      name: CommunityGraphStackOverflowImport-${self:provider.environment.TITLE}
+      handler: handler.so_import
+      events:
+        - schedule: rate(1 hour)
