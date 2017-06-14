@@ -186,12 +186,19 @@ def import_links(neo4j_url, neo4j_user, neo4j_pass, bearer_token, search):
                     print("backoff", json['backoff'])
                     time.sleep(json['backoff'] + 5)
 
+unhydrated_query = """\
+MATCH (link:Link) 
+WHERE not exists(link.title) 
+RETURN id(link) as id, link.url as url 
+ORDER BY ID(link) DESC 
+LIMIT {limit}
+"""
 
 def hydrate_links(neo4j_url, neo4j_user, neo4j_pass):
     with GraphDatabase.driver(neo4j_url, auth=basic_auth(neo4j_user, neo4j_pass)) as driver:
         with driver.session() as session:
             result = session.run(
-                "MATCH (link:Link) WHERE not exists(link.title) RETURN id(link) as id, link.url as url ORDER BY ID(link) DESC LIMIT {limit}",
+                unhydrated_query,
                 {"limit": 100})
 
             rows = 0
@@ -260,11 +267,22 @@ def unshorten_url(url):
     else:
         return url
 
+not_cleaned_links_query = """\
+MATCH (l:Link) 
+WHERE NOT EXISTS(l.cleanUrl) AND EXISTS(l.url) 
+RETURN l, ID(l) AS internalId
+"""
+
+update_links_query = """\
+UNWIND {updates} AS update
+MATCH (l:Link) WHERE ID(l) = update.id
+SET l.cleanUrl = update.clean
+"""
+
 def clean_links(neo4j_url, neo4j_user, neo4j_pass):
     with GraphDatabase.driver(neo4j_url, auth=basic_auth(neo4j_user, neo4j_pass)) as driver:
         with driver.session() as session:
-            query = "MATCH (l:Link) WHERE NOT EXISTS(l.cleanUrl) AND EXISTS(l.url) RETURN l, ID(l) AS internalId"
-            result = session.run(query)
+            result = session.run(not_cleaned_links_query)
 
             updates = []
             for row in result:
@@ -276,13 +294,7 @@ def clean_links(neo4j_url, neo4j_user, neo4j_pass):
 
             print("Updates to apply", updates)
 
-            update_query = """\
-            UNWIND {updates} AS update
-            MATCH (l:Link) WHERE ID(l) = update.id
-            SET l.cleanUrl = update.clean
-            """
-
-            update_result = session.run(update_query, {"updates": updates})
+            update_result = session.run(update_links_query, {"updates": updates})
 
             print(update_result)
 

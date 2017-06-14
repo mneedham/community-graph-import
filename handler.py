@@ -6,7 +6,7 @@ import lib.summary as summary
 import lib.twitter as twitter
 import lib.github as github
 
-from lib.encryption import import_links, decrypt_value, clean_links, hydrate_links
+from lib.encryption import decrypt_value
 
 
 def generate_page_summary(event, _):
@@ -33,7 +33,7 @@ def twitter_import(event, _):
     search = os.environ.get("TWITTER_SEARCH")
 
     twitter.import_links(neo4j_url=neo4j_url, neo4j_user=neo4j_user, neo4j_pass=neo4j_password,
-                 bearer_token=twitter_bearer, search=search)
+                         bearer_token=twitter_bearer, search=search)
 
 
 def twitter_clean_links(event, _):
@@ -43,7 +43,7 @@ def twitter_clean_links(event, _):
     neo4j_user = os.environ.get('NEO4J_USER', "neo4j")
     neo4j_password = decrypt_value(os.environ['NEO4J_PASSWORD'])
 
-    clean_links(neo4j_url=neo4j_url, neo4j_user=neo4j_user, neo4j_pass=neo4j_password)
+    twitter.clean_links(neo4j_url=neo4j_url, neo4j_user=neo4j_user, neo4j_pass=neo4j_password)
 
 
 def twitter_hydrate_links(event, _):
@@ -65,6 +65,7 @@ def twitter_unshorten_links(event, _):
 
     twitter.unshorten_links(neo4j_url=neo4j_url, neo4j_user=neo4j_user, neo4j_pass=neo4j_password)
 
+
 def github_import(event, _):
     print("Event:", event)
 
@@ -75,7 +76,8 @@ def github_import(event, _):
 
     tag = os.environ.get('TAG')
 
-    github.import_github(neo4j_url=neo4j_url, neo4j_user=neo4j_user, neo4j_pass=neo4j_password, tag = tag, github_token=github_token)
+    github.import_github(neo4j_url=neo4j_url, neo4j_user=neo4j_user, neo4j_pass=neo4j_password, tag=tag,
+                         github_token=github_token)
 
 
 def meetup_events_import(event, _):
@@ -112,4 +114,4 @@ def so_import(event, _):
 
     tag = os.environ.get('TAG')
 
-    so.import_so(neo4j_url=neo4j_url, neo4j_user=neo4j_user, neo4j_pass=neo4j_password, tag = tag)
+    so.import_so(neo4j_url=neo4j_url, neo4j_user=neo4j_user, neo4j_pass=neo4j_password, tag=tag)
