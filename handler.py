@@ -6,7 +6,7 @@ import lib.summary as summary
 import lib.twitter as twitter
 import lib.github as github
 
-from lib.utils import import_links, decrypt_value, clean_links, hydrate_links
+from lib.encryption import import_links, decrypt_value, clean_links, hydrate_links
 
 
 def generate_page_summary(event, _):
@@ -32,7 +32,7 @@ def twitter_import(event, _):
 
     search = os.environ.get("TWITTER_SEARCH")
 
-    import_links(neo4j_url=neo4j_url, neo4j_user=neo4j_user, neo4j_pass=neo4j_password,
+    twitter.import_links(neo4j_url=neo4j_url, neo4j_user=neo4j_user, neo4j_pass=neo4j_password,
                  bearer_token=twitter_bearer, search=search)
 
 
@@ -53,7 +53,7 @@ def twitter_hydrate_links(event, _):
     neo4j_user = os.environ.get('NEO4J_USER', "neo4j")
     neo4j_password = decrypt_value(os.environ['NEO4J_PASSWORD'])
 
-    hydrate_links(neo4j_url=neo4j_url, neo4j_user=neo4j_user, neo4j_pass=neo4j_password)
+    twitter.hydrate_links(neo4j_url=neo4j_url, neo4j_user=neo4j_user, neo4j_pass=neo4j_password)
 
 
 def twitter_unshorten_links(event, _):
