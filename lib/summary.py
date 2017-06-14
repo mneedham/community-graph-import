@@ -97,7 +97,10 @@ def humanise_filter(value):
 
 @app.template_filter("shorten")
 def shorten_filter(value):
-    return (value[:75] + '..') if len(value) > 75 else value
+    if not value:
+        return value
+    else:
+        return (value[:75] + '..') if len(value) > 75 else value
 
 
 def generate(url, user, password, title, short_name):
