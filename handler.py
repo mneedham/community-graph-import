@@ -4,7 +4,9 @@ import lib.meetup as meetup
 import lib.so as so
 import lib.summary as summary
 import lib.twitter as twitter
-from lib.utils import import_links, decrypt_value, clean_links, hydrate_links, import_github
+import lib.github as github
+
+from lib.utils import import_links, decrypt_value, clean_links, hydrate_links
 
 
 def generate_page_summary(event, _):
@@ -73,7 +75,7 @@ def github_import(event, _):
 
     tag = os.environ.get('TAG')
 
-    import_github(neo4j_url=neo4j_url, neo4j_user=neo4j_user, neo4j_pass=neo4j_password, tag = tag, github_token=github_token)
+    github.import_github(neo4j_url=neo4j_url, neo4j_user=neo4j_user, neo4j_pass=neo4j_password, tag = tag, github_token=github_token)
 
 
 def meetup_events_import(event, _):
