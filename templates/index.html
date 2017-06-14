@@ -47,6 +47,72 @@
                     ]
 
 				});
+
+				$('#github-table').DataTable({
+				    "order": [[ 3, "desc" ]],
+				     "columnDefs": [
+                        {
+                            "targets": [ 5,6 ],
+                            "visible": false,
+                            "searchable": false
+                        },
+
+                        {
+                            "targets": [ 3 ],
+                            "orderData": [ 5 ]
+                        },
+                        {
+                            "targets": [ 4 ],
+                            "orderData": [ 6 ]
+                        },
+                    ]
+
+				});
+
+				$('#meetup-table').DataTable({
+				    "order": [[ 3, "asc" ]],
+				     "columnDefs": [
+                        {
+                            "targets": [ 3 ],
+                            "visible": false,
+                            "searchable": false
+                        },
+
+                        {
+                            "targets": [ 2 ],
+                            "orderData": [ 3 ]
+                        },
+                    ]
+				});
+
+				$('#so-table').DataTable({
+				    "order": [[ 1, "desc" ]],
+				     "columnDefs": [
+                        {
+                            "targets": [ 2 ],
+                            "orderable": false
+                        },
+                    ]
+				});
+
+				$('#twitter-active-table').DataTable({
+				    "order": [[ 1, "desc" ]],
+				});
+
+                $('#github-active-table').DataTable({
+				    "order": [[ 1, "desc" ]],
+				    "columnDefs": [
+                        {
+                            "targets": [ 2 ],
+                            "orderable": false
+                        },
+                    ]
+				});
+
+				$('#so-active-table').DataTable({
+				    "order": [[ 1, "desc" ]],
+				});
+
 			} );
 		</script>
 
@@ -72,7 +138,7 @@
     <div class="tab-content">
 
         <div role="tabpanel" class="tab-pane active" id="twitter">
-            <table id="twitter-table" class="table table-striped" >
+            <table id="twitter-table" class="table table-striped" width="100%">
                  <thead>
                 <tr>
                     <th>Title</th>
@@ -111,15 +177,20 @@
         </div>
 
         <div role="tabpanel" class="tab-pane" id="github">
-            <table class="table .table-striped">
+            <table id="github-table" class="table .table-striped" width="100%">
+                <thead>
                 <tr>
                     <th>Project</th>
                     <th>User</th>
                     <th>Favourites</th>
                     <th>Updated</th>
                     <th>Created</th>
+                    <th>Updated Timestamp</th>
+                    <th>Created Timestamp</th>
                 </tr>
+                </thead>
 
+                <tbody>
                 {% for r in github_records %}
                 <tr>
                     <td><a href="{{r['n.url']}}" target="_blank">{{r['n.title']}}</a></td>
@@ -127,37 +198,50 @@
                     <td>{{ r['n.favorites']}}</td>
                     <td>{{ r['n.updated'] | humanise }}</td>
                     <td>{{ r['n.created'] | humanise }}</td>
+
+                    <td>{{ r['n.updated'] }}</td>
+                    <td>{{ r['n.created'] }}</td>
                 </tr>
                 {% endfor %}
+                </tbody>
             </table>
         </div>
 
         <div role="tabpanel" class="tab-pane" id="meetup">
-            <table class="table .table-striped">
+            <table id="meetup-table" class="table .table-striped" width="100%">
+                <thead>
                 <tr>
                     <th>Event</th>
                     <th>Group</th>
                     <th>Time</th>
+                    <th>Timestamp</th>
                 </tr>
+                </thead>
 
+                <tbody>
                 {% for r in meetup_records %}
                 <tr>
                     <td><a href="{{r['event']['link']}}" target="_blank">{{ r['event']['title'] }}</a></td>
                     <td>{{ r['group']['title'] }}</td>
                     <td>{{ r['event']['time'] | humanise }}</td>
+                    <td>{{ r['event']['time'] }}</td>
                 </tr>
                 {% endfor %}
+                </tbody>
             </table>
         </div>
 
         <div role="tabpanel" class="tab-pane" id="so">
-            <table class="table .table-striped">
+            <table id="so-table"  class="table .table-striped">
+                <thead>
                 <tr>
                     <th>Question</th>
                     <th>Views</th>
                     <th>Tags</th>
                 </tr>
+                </thead>
 
+                <tbody>
                 {% for r in so_records %}
                 <tr>
                     <td><a href="{{r['question']['url']}}" target="_blank">{{ r['question']['title'] }}</a></td>
@@ -172,18 +256,22 @@
                     </td>
                 </tr>
                 {% endfor %}
+                </tbody>
             </table>
         </div>
 
         <div role="tabpanel" class="tab-pane" id="twitter-active-members">
 
-            <table class="table .table-striped">
+            <table id="twitter-active-table" class="table .table-striped">
+                <thead>
                 <tr>
                     <th>User</th>
                     <th>Tweets this week</th>
                     <th>Tweets last week</th>
                 </tr>
+                </thead>
 
+                <tbody>
                 {% for r in twitter_active_members %}
                 <tr>
                     <td>
@@ -198,18 +286,24 @@
                     <td>{{ r['lastWeekCount'] }}</td>
                 </tr>
                 {% endfor %}
+                </tbody>
             </table>
         </div>
 
         <div role="tabpanel" class="tab-pane" id="github-active-members">
 
-            <table class="table .table-striped">
+            <table id="github-active-table" class="table .table-striped">
+                <thead>
                 <tr>
+
                     <th>User</th>
                     <th># repos</th>
                     <th>Repositories</th>
-                </tr>
 
+                </tr>
+                    </thead>
+
+                <tbody>
                 {% for r in github_active_members %}
                 <tr>
                     <td>
@@ -231,18 +325,22 @@
                     </td>
                 </tr>
                 {% endfor %}
+                </tbody>
             </table>
         </div>
 
                 <div role="tabpanel" class="tab-pane" id="so-active-members">
 
-            <table class="table .table-striped">
+            <table id="so-active-table" class="table .table-striped">
+                <thead>
                 <tr>
                     <th>User</th>
                     <th>Answers this week</th>
                     <th>Answers last week</th>
                 </tr>
+                </thead>
 
+                <tbody>
                 {% for r in so_active_members %}
                 <tr>
                     <td>
@@ -257,6 +355,7 @@
                     <td>{{ r['lastWeekReplies'] }}</td>
                 </tr>
                 {% endfor %}
+                </tbody>
             </table>
         </div>
 
