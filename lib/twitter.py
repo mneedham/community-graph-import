@@ -129,6 +129,7 @@ def import_links(neo4j_url, neo4j_user, neo4j_pass, bearer_token, search):
             session.run("CREATE CONSTRAINT ON (u:User) ASSERT u.screen_name IS UNIQUE;")
             session.run("CREATE INDEX ON :Tag(name);")
             session.run("CREATE INDEX ON :Link(url);")
+            session.run("CREATE INDEX ON :Tweet(created);")
 
             q = urllib.parse.quote(search, safe='')
             max_pages = 100
@@ -197,13 +198,10 @@ LIMIT {limit}
 def hydrate_links(neo4j_url, neo4j_user, neo4j_pass):
     with GraphDatabase.driver(neo4j_url, auth=basic_auth(neo4j_user, neo4j_pass)) as driver:
         with driver.session() as session:
-            result = session.run(
-                unhydrated_query,
-                {"limit": 100})
+            result = session.run(unhydrated_query, {"limit": 100})
 
             rows = 0
             for record in result:
-
                 try:
                     print("Processing {0}".format(record["url"]))
                     title = hydrate_url(record["url"])
@@ -278,6 +276,7 @@ UNWIND {updates} AS update
 MATCH (l:Link) WHERE ID(l) = update.id
 SET l.cleanUrl = update.clean
 """
+
 
 def clean_links(neo4j_url, neo4j_user, neo4j_pass):
     with GraphDatabase.driver(neo4j_url, auth=basic_auth(neo4j_user, neo4j_pass)) as driver:

@@ -3,7 +3,7 @@
 <head>
     <title>This Week In {{ title }}</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
 
     <!-- Latest compiled and minified CSS -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
@@ -15,6 +15,40 @@
 
 
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/bs/jqc-1.12.4/dt-1.10.15/datatables.min.css"/>
+
+    <script type="text/javascript" src="https://cdn.datatables.net/v/bs/jqc-1.12.4/dt-1.10.15/datatables.min.js"></script>
+
+    <style>
+    .dataTables_wrapper {
+        padding-top: 5px;
+    }
+    </style>
+
+    <script type="text/javascript" charset="utf-8">
+			$(document).ready(function() {
+				$('#twitter-table').DataTable({
+				    "order": [[ 2, "desc" ]],
+				     "columnDefs": [
+                        {
+                            "targets": [ 5 ],
+                            "visible": false,
+                            "searchable": false
+                        },
+                        {
+                            "targets": [ 3 ],
+                            "orderable": false
+                        },
+                        {
+                            "targets": [ 4 ],
+                            "orderData": [ 5 ]
+                        },
+                    ]
+
+				});
+			} );
+		</script>
 
 </head>
 
@@ -38,15 +72,19 @@
     <div class="tab-content">
 
         <div role="tabpanel" class="tab-pane active" id="twitter">
-            <table class="table table-striped">
+            <table id="twitter-table" class="table table-striped" >
+                 <thead>
                 <tr>
                     <th>Title</th>
                     <th>URL</th>
                     <th>Score</th>
                     <th>Users</th>
                     <th>Created</th>
+                    <th>Timestamp</th>
                 </tr>
+                 </thead>
 
+                <tbody>
                 {% for r in twitter_records %}
                 <tr>
                     <td>{{ r['title'] }}</td>
@@ -62,8 +100,12 @@
                     <td>
                         {{ r['dateCreated'] | humanise }}
                     </td>
+                    <td>
+                        {{ r['dateCreated']  }}
+                    </td>
                 </tr>
                 {% endfor %}
+                </tbody>
             </table>
 
         </div>
@@ -138,7 +180,8 @@
             <table class="table .table-striped">
                 <tr>
                     <th>User</th>
-                    <th># of tweets</th>
+                    <th>Tweets this week</th>
+                    <th>Tweets last week</th>
                 </tr>
 
                 {% for r in twitter_active_members %}
@@ -151,7 +194,8 @@
                             <a href="http://twitter.com/{{r['user']}}" target="_blank">@{{r['user']}}</a>
                         </div>
                     </td>
-                    <td>{{ r['count'] }} ({{ r['lastWeekCount'] }})</td>
+                    <td>{{ r['count'] }}</td>
+                    <td>{{ r['lastWeekCount'] }}</td>
                 </tr>
                 {% endfor %}
             </table>
@@ -162,7 +206,7 @@
             <table class="table .table-striped">
                 <tr>
                     <th>User</th>
-                    <th># of repos</th>
+                    <th># repos</th>
                     <th>Repositories</th>
                 </tr>
 
@@ -195,7 +239,8 @@
             <table class="table .table-striped">
                 <tr>
                     <th>User</th>
-                    <th># of answers</th>
+                    <th>Answers this week</th>
+                    <th>Answers last week</th>
                 </tr>
 
                 {% for r in so_active_members %}
@@ -208,7 +253,8 @@
                             <a href="https://stackoverflow.com/users/{{r['user']['id']}}" target="_blank">{{r['user']['name']}}</a>
                         </div>
                     </td>
-                    <td>{{ r['replies'] }} ({{ r['lastWeekReplies'] }})</td>
+                    <td>{{ r['replies'] }}</td>
+                    <td>{{ r['lastWeekReplies'] }}</td>
                 </tr>
                 {% endfor %}
             </table>
