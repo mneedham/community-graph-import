@@ -10,6 +10,7 @@ from neo4j.v1 import GraphDatabase
 from lib.utils import import_links, decrypt_value, clean_links, hydrate_links, import_github
 import lib.meetup as meetup
 import lib.so as so
+import lib.twitter as twitter
 
 twitter_query = """\
 WITH ((timestamp() / 1000) - (7 * 24 * 60 * 60)) AS oneWeekAgo
@@ -74,9 +75,9 @@ match (question:Question:Content:StackOverflow)<--(:Answer)<-[:POSTED]-(user)
 WHERE question.created > oneWeekAgo
 WITH user, count(*) AS replies, oneWeekAgo, twoWeeksAgo
 ORDER BY replies DESC
-MATCH (user)-[:POSTED]->(:Answer)-->(question:Question) 
+OPTIONAL MATCH (user)-[:POSTED]->(:Answer)-->(question:Question) 
 WHERE oneWeekAgo > question.created > twoWeeksAgo
-RETURN user, replies, COUNT(*) AS lastWeekReplies
+RETURN user, replies, COUNT(question) AS lastWeekReplies
 ORDER BY replies DESC
 """
 
@@ -168,6 +169,15 @@ def twitter_hydrate_links(event, _):
 
     hydrate_links(neo4j_url=neo4j_url, neo4j_user=neo4j_user, neo4j_pass=neo4j_password)
 
+
+def twitter_unshorten_links(event, _):
+    print("Event:", event)
+
+    neo4j_url = os.environ.get('NEO4J_URL', "bolt://localhost")
+    neo4j_user = os.environ.get('NEO4J_USER', "neo4j")
+    neo4j_password = decrypt_value(os.environ['NEO4J_PASSWORD'])
+
+    twitter.unshorten_links(neo4j_url=neo4j_url, neo4j_user=neo4j_user, neo4j_pass=neo4j_password)
 
 def github_import(event, _):
     print("Event:", event)

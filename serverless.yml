@@ -44,6 +44,11 @@ functions:
       handler: handler.twitter_hydrate_links
       events:
         - schedule: rate(1 hour)
+  twitter-unshorten-links:
+      name: CommunityGraphTwitterUnshortenLinks-${self:provider.environment.TITLE}
+      handler: handler.twitter_unshorten_links
+      events:
+        - schedule: rate(1 hour)
   github-import:
       name: CommunityGraphGitHubImport-${self:provider.environment.TITLE}
       handler: handler.github_import
