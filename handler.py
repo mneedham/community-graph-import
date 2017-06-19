@@ -9,16 +9,20 @@ import lib.github as github
 from lib.encryption import decrypt_value
 
 
+def str_to_bool(s):
+    return s == 'True'
+
+
 def generate_page_summary(event, _):
-    print("Event:", event)
+    if str_to_bool(os.environ.get("GENERATE_SUMMARY_PAGE", "False")):
+        print("Event:", event)
+        url = os.environ["READ_ONLY_URL"]
+        user = os.environ["READ_ONLY_USER"]
+        password = os.environ["READ_ONLY_PASSWORD"]
+        title = os.environ["TITLE"]
+        short_name = os.environ["SUMMARY"]
 
-    url = os.environ["READ_ONLY_URL"]
-    user = os.environ["READ_ONLY_USER"]
-    password = os.environ["READ_ONLY_PASSWORD"]
-    title = os.environ["TITLE"]
-    short_name = os.environ["SUMMARY"]
-
-    summary.generate(url, user, password, title, short_name)
+        summary.generate(url, user, password, title, short_name)
 
 
 def twitter_import(event, _):
