@@ -18,7 +18,8 @@ ON CREATE SET
 SET repo.favorites = r.stargazers_count, repo.updated = apoc.date.parse(r.updated_at,'ms',"yyyy-MM-dd'T'HH:mm:ss'Z'"), 
     repo.updated_at = r.updated_at, repo.pushed = r.pushed_at,repo.size = r.size,
     repo.watchers = r.watchers, repo.language = r.language, repo.forks = r.forks_count,
-    repo.open_issues = r.open_issues, repo.branch = r.default_branch, repo.description = r.description
+    repo.open_issues = r.open_issues, repo.branch = r.default_branch, repo.description = r.description,
+    repo.isPrivate = r.isPrivate
 
 MERGE (owner:User:GitHub {id:r.owner.id}) 
 SET owner.name = r.owner.login, owner.type=r.owner.type, owner.full_name = r.owner.name, 
@@ -44,6 +45,7 @@ query Repositories($searchTerm: String!, $cursor: String) {
      __typename
      ... on Repository {
        databaseId
+       isPrivate
        name
        url       
        pushedAt
@@ -113,35 +115,40 @@ def import_github(neo4j_url, neo4j_user, neo4j_pass, tag, github_token):
                 for node in search_section["nodes"]:
                     languages = [n["name"] for n in node["languages"]["nodes"]]
                     default_branch_ref = node.get("defaultBranchRef") if node.get("defaultBranchRef") else {}
+                    full_name = "{login}/{name}".format(name=node["name"], login=node["owner"]["login"])
 
-                    params = {
-                        "id": node["databaseId"],
-                        "name": node["name"],
-                        "full_name": "{login}/{name}".format(name=node["name"], login=node["owner"]["login"]),
-                        "created_at": node["createdAt"],
-                        "pushed_at": node["pushedAt"],
-                        "updated_at": node["updatedAt"],
-                        "size": node["diskUsage"],
-                        "homepage": node["homepageUrl"],
-                        "stargazers_count": node["forks"]["totalCount"],
-                        "forks_count": node["stargazers"]["totalCount"],
-                        "watchers": node["watchers"]["totalCount"],
-                        "owner": {
-                            "id": node["owner"].get("databaseId", ""),
-                            "login": node["owner"]["login"],
-                            "avatarUrl": node["owner"]["avatarUrl"],
-                            "name": node["owner"].get("name", ""),
-                            "type": node["owner"]["__typename"],
-                            "location": node["owner"].get("location", "")
-                        },
-                        "default_branch": default_branch_ref.get("name", ""),
-                        "open_issues": node["issues"]["totalCount"],
-                        "description": node["description"],
-                        "html_url": node["url"],
-                        "language": languages[0] if len(languages) > 0 else ""
-                    }
+                    if not node["isPrivate"]:
+                        params = {
+                            "id": node["databaseId"],
+                            "isPrivate": node["isPrivate"],
+                            "name": node["name"],
+                            "full_name": full_name,
+                            "created_at": node["createdAt"],
+                            "pushed_at": node["pushedAt"],
+                            "updated_at": node["updatedAt"],
+                            "size": node["diskUsage"],
+                            "homepage": node["homepageUrl"],
+                            "stargazers_count": node["forks"]["totalCount"],
+                            "forks_count": node["stargazers"]["totalCount"],
+                            "watchers": node["watchers"]["totalCount"],
+                            "owner": {
+                                "id": node["owner"].get("databaseId", ""),
+                                "login": node["owner"]["login"],
+                                "avatarUrl": node["owner"]["avatarUrl"],
+                                "name": node["owner"].get("name", ""),
+                                "type": node["owner"]["__typename"],
+                                "location": node["owner"].get("location", "")
+                            },
+                            "default_branch": default_branch_ref.get("name", ""),
+                            "open_issues": node["issues"]["totalCount"],
+                            "description": node["description"],
+                            "html_url": node["url"],
+                            "language": languages[0] if len(languages) > 0 else ""
+                        }
 
-                    the_json.append(params)
+                        the_json.append(params)
+                    else:
+                        print("Skipping private repository", full_name)
 
                 has_more = search_section["pageInfo"]["hasNextPage"]
                 cursor = search_section["pageInfo"]["endCursor"]

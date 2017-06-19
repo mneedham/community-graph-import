@@ -267,7 +267,7 @@ def unshorten_url(url):
 
 not_cleaned_links_query = """\
 MATCH (l:Link) 
-WHERE NOT EXISTS(l.cleanUrl) AND EXISTS(l.url) 
+WHERE NOT(EXISTS(l.short)) AND NOT(EXISTS(l.cleanUrl))
 RETURN l, ID(l) AS internalId
 """
 
