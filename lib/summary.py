@@ -14,22 +14,22 @@ WHERE not(t:Retweet)
 WITH oneWeekAgo, l, t
 ORDER BY l.cleanUrl, toInteger(t.created)
 
-WITH oneWeekAgo, l.cleanUrl AS url, l.title AS title, collect(t) AS tweets 
+WITH oneWeekAgo, l.cleanUrl AS url, l.title AS title, collect(t) AS tweets
 WHERE toInteger(tweets[0].created) is not null AND tweets[0].created > oneWeekAgo AND NONE(rogue in ["abizy.com", "twitter.com", "corneey.com"] WHERE url contains rogue)
-RETURN url, title, 
-       REDUCE(acc = 0, tweet IN tweets | acc + tweet.favorites + size((tweet)<-[:RETWEETED]-())) AS score, 
-       tweets[0].created * 1000 AS dateCreated, 
+RETURN url, title,
+       REDUCE(acc = 0, tweet IN tweets | acc + tweet.favorites + size((tweet)<-[:RETWEETED]-())) AS score,
+       tweets[0].created * 1000 AS dateCreated,
        apoc.coll.toSet([ tweet IN tweets | head([ (tweet)<-[:POSTED]-(user) | user.screen_name]) ]) AS users
 ORDER BY score DESC
 """
 
 github_query = """\
-MATCH (n:Repository) WHERE EXISTS(n.created) AND n.updated > timestamp() - 7 * 60 * 60 * 24 * 1000
+MATCH (n:Repository) WHERE EXISTS(n.created) AND n.pushed > timestamp() - 7 * 60 * 60 * 24 * 1000
 WITH n
 ORDER BY n.updated desc
 MATCH (n)<-[:CREATED]-(user)
-RETURN n.title, n.url, n.created, n.favorites, n.updated, user.name, n.created_at, n.updated_at
-ORDER BY n.updated desc
+RETURN n.title, n.url, n.created, n.favorites, n.updated, user.name, n.created_at, n.updated_at, n.description, n.pushed, n.pushed_at
+ORDER BY n.pushed desc
 """
 
 meetup_query = """\
@@ -57,7 +57,7 @@ RETURN user.name, user.avatarUrl, count, [repo in repos | repo { .title, .full_n
 """
 
 twitter_active_query = """\
-MATCH (n:Tweet) 
+MATCH (n:Tweet)
 WHERE EXISTS(n.created) AND n.created > ((timestamp() / 1000) - 7 * 60 * 60 * 24 )
 WITH n
 MATCH (n)<-[:POSTED]-(user) WHERE NOT (user.screen_name IN ["neo4j", "neo4j-contrib"])
@@ -66,8 +66,8 @@ WITH user, COUNT(*) AS count
 ORDER BY count desc
 
 WITH user, count
-OPTIONAL MATCH (user)-[:POSTED]->(n:Tweet) 
-WHERE EXISTS(n.created) 
+OPTIONAL MATCH (user)-[:POSTED]->(n:Tweet)
+WHERE EXISTS(n.created)
 AND ((timestamp() / 1000) - 7 * 60 * 60 * 24 ) > n.created > ((timestamp() / 1000) - 14 * 60 * 60 * 24 )
 RETURN user.screen_name AS user, user.profile_image_url AS profile_image, count, count(n) AS lastWeekCount
 ORDER BY count desc
@@ -81,7 +81,7 @@ WHERE question.created > oneWeekAgo
 
 WITH user, count(*) AS replies, oneWeekAgo, twoWeeksAgo
 ORDER BY replies DESC
-OPTIONAL MATCH (user)-[:POSTED]->(:Answer)-->(question:Question) 
+OPTIONAL MATCH (user)-[:POSTED]->(:Answer)-->(question:Question)
 WHERE oneWeekAgo > question.created > twoWeeksAgo
 RETURN user, replies, COUNT(question) AS lastWeekReplies
 ORDER BY replies DESC
@@ -92,6 +92,7 @@ app = flask.Flask('my app')
 
 @app.template_filter('humanise')
 def humanise_filter(value):
+    print("humanising:", value)
     return human(datetime.fromtimestamp(value / 1000), precision=1)
 
 

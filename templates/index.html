@@ -193,13 +193,20 @@
                 <tbody>
                 {% for r in github_records %}
                 <tr>
-                    <td><a href="{{r['n.url']}}" target="_blank">{{r['n.title']}}</a></td>
+                    <td>
+                        <p>
+                            <a href="{{r['n.url']}}" target="_blank">{{r['n.title']}}</a>
+                        </p>
+                        <p>
+                            {{r['n.description'] | shorten }}
+                        </p>
+                    </td>
                     <td><a href="http://github.com/{{r['user.name']}}" target="_blank">{{r['user.name']}}</a></td>
                     <td>{{ r['n.favorites']}}</td>
-                    <td>{{ r['n.updated'] | humanise }}</td>
+                    <td>{{ r['n.pushed'] | humanise }}</td>
                     <td>{{ r['n.created'] | humanise }}</td>
 
-                    <td>{{ r['n.updated'] }}</td>
+                    <td>{{ r['n.pushed'] }}</td>
                     <td>{{ r['n.created'] }}</td>
                 </tr>
                 {% endfor %}

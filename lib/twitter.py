@@ -125,11 +125,11 @@ def import_links(neo4j_url, neo4j_user, neo4j_pass, bearer_token, search):
         with driver.session() as session:
 
             # Add uniqueness constraints.
-            session.run("CREATE CONSTRAINT ON (t:Tweet) ASSERT t.id IS UNIQUE;")
-            session.run("CREATE CONSTRAINT ON (u:User) ASSERT u.screen_name IS UNIQUE;")
-            session.run("CREATE INDEX ON :Tag(name);")
-            session.run("CREATE INDEX ON :Link(url);")
-            session.run("CREATE INDEX ON :Tweet(created);")
+            # session.run("CREATE CONSTRAINT ON (t:Tweet) ASSERT t.id IS UNIQUE;")
+            # session.run("CREATE CONSTRAINT ON (u:User) ASSERT u.screen_name IS UNIQUE;")
+            # session.run("CREATE INDEX ON :Tag(name);")
+            # session.run("CREATE INDEX ON :Link(url);")
+            # session.run("CREATE INDEX ON :Tweet(created);")
 
             q = urllib.parse.quote(search, safe='')
             max_pages = 100
@@ -194,6 +194,7 @@ RETURN id(link) as id, link.url as url
 ORDER BY ID(link) DESC 
 LIMIT {limit}
 """
+
 
 def hydrate_links(neo4j_url, neo4j_user, neo4j_pass):
     with GraphDatabase.driver(neo4j_url, auth=basic_auth(neo4j_user, neo4j_pass)) as driver:
@@ -300,7 +301,7 @@ def clean_links(neo4j_url, neo4j_user, neo4j_pass):
 
 def clean_uri(url):
     u = urlparse(url)
-    query = parse_qs(u.query)
+    query = parse_qs(u.query.decode("utf-8"))
 
     for param in ["utm_content", "utm_source", "utm_medium", "utm_campaign", "utm_term"]:
         query.pop(param, None)

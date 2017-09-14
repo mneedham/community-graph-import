@@ -11,18 +11,22 @@ import_query = """
 WITH {json} as data
 UNWIND data.items as r
 MERGE (repo:Repository:GitHub {id:r.id})
-ON CREATE SET 
-    repo.title = r.name, repo.full_name=r.full_name, repo.url = r.html_url, 
+ON CREATE SET
+    repo.title = r.name, repo.full_name=r.full_name, repo.url = r.html_url,
     repo.created = apoc.date.parse(r.created_at,'ms',"yyyy-MM-dd'T'HH:mm:ss'Z'"), repo.created_at = r.created_at,
     repo.homepage = r.homepage
-SET repo.favorites = r.stargazers_count, repo.updated = apoc.date.parse(r.updated_at,'ms',"yyyy-MM-dd'T'HH:mm:ss'Z'"), 
-    repo.updated_at = r.updated_at, repo.pushed = r.pushed_at,repo.size = r.size,
+SET repo.favorites = r.stargazers_count,
+    repo.updated = apoc.date.parse(r.updated_at,'ms',"yyyy-MM-dd'T'HH:mm:ss'Z'"),
+    repo.updated_at = r.updated_at,
+    repo.pushed = apoc.date.parse(r.pushed_at,'ms',"yyyy-MM-dd'T'HH:mm:ss'Z'"),
+    repo.pushed_at = r.pushed_at,
+    repo.size = r.size,
     repo.watchers = r.watchers, repo.language = r.language, repo.forks = r.forks_count,
     repo.open_issues = r.open_issues, repo.branch = r.default_branch, repo.description = r.description,
     repo.isPrivate = r.isPrivate
 
-MERGE (owner:User:GitHub {id:r.owner.id}) 
-SET owner.name = r.owner.login, owner.type=r.owner.type, owner.full_name = r.owner.name, 
+MERGE (owner:User:GitHub {id:r.owner.id})
+SET owner.name = r.owner.login, owner.type=r.owner.type, owner.full_name = r.owner.name,
     owner.location = r.owner.location, owner.avatarUrl = r.owner.avatarUrl
 MERGE (owner)-[:CREATED]->(repo)
 """
@@ -30,7 +34,7 @@ MERGE (owner)-[:CREATED]->(repo)
 graphql_query = """\
 query Repositories($searchTerm: String!, $cursor: String) {
  rateLimit {
-    limit 
+    limit
     cost
     remaining
     resetAt
@@ -47,7 +51,7 @@ query Repositories($searchTerm: String!, $cursor: String) {
        databaseId
        isPrivate
        name
-       url       
+       url
        pushedAt
        createdAt
        updatedAt
@@ -62,7 +66,7 @@ query Repositories($searchTerm: String!, $cursor: String) {
        languages(first:1, orderBy: {field: SIZE, direction:DESC}) {
          nodes { name }
        }
-       owner {          
+       owner {
          __typename
          login
          avatarUrl
@@ -75,9 +79,9 @@ query Repositories($searchTerm: String!, $cursor: String) {
             name
             databaseId
          }
-       }    
+       }
         defaultBranchRef { name }
-     }      
+     }
    }
  }
 }
