@@ -21,8 +21,9 @@ def generate_page_summary(event, _):
         password = os.environ["READ_ONLY_PASSWORD"]
         title = os.environ["TITLE"]
         short_name = os.environ["SUMMARY"]
+        logo_src = os.environ["LOGO"]
 
-        summary.generate(url, user, password, title, short_name)
+        summary.generate(url, user, password, title, short_name, logo_src)
 
 
 def twitter_import(event, _):

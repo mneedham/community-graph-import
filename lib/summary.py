@@ -92,7 +92,6 @@ app = flask.Flask('my app')
 
 @app.template_filter('humanise')
 def humanise_filter(value):
-    print("humanising:", value)
     return human(datetime.fromtimestamp(value / 1000), precision=1)
 
 
@@ -104,7 +103,7 @@ def shorten_filter(value):
         return (value[:75] + '..') if len(value) > 75 else value
 
 
-def generate(url, user, password, title, short_name):
+def generate(url, user, password, title, short_name, logo_src):
 
     with GraphDatabase.driver("bolt://{url}:7687".format(url=url), auth=(user, password)) as driver:
         with driver.session() as session:
@@ -126,6 +125,7 @@ def generate(url, user, password, title, short_name):
                                    twitter_active_members=twitter_active_members,
                                    so_active_members=so_active_members,
                                    title=title,
+                                   logo_src=logo_src,
                                    time_now=str(datetime.now(timezone.utc)))
 
         local_file_name = "/tmp/{file_name}.html".format(file_name=short_name)
