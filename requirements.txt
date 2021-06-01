@@ -22,5 +22,5 @@ python-dateutil==2.6.0 #no-deploy
 requests==2.17.3
 s3transfer==0.1.10 #no-deploy
 six==1.10.0 #no-deploy
-urllib3==1.21.1
+urllib3==1.26.5
 Werkzeug==0.12.2
