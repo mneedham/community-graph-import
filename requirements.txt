@@ -5,7 +5,7 @@ boto==2.47.0 #no-deploy
 boto3==1.4.4 #no-deploy
 botocore==1.5.58 #no-deploy
 bs4==0.0.1
-certifi==2017.4.17
+certifi==2022.12.7
 chardet==3.0.3
 click==6.7
 docutils==0.13.1 #no-deploy
